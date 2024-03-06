@@ -26,9 +26,22 @@ The scripts relies on the following Python dependencies respectively:
 
 
 ## Installation
-
+```bash
+git clone https://github.com/bwithai/Sysdiagnose.git
+cd Sysdiagnose
+# create your python virtual environment variable (venv)
+pip install -r requirements.txt
+uvicorn main:app
+```
 ## Usage
-
+we have three endpoints:
+> upload_file
+  - Upload your sysdiagnose_2024.03.01_13-30-50+0400_iPhone-OS_iPhone_00H000.tar.gz file
+  - [How to Trigger a Sysdiagnose Manually](https://hcsonline.com/images/PDFs/Sysdiagnose.pdf)
+> log-parsing
+  - Analysts and users want to share their log files and parse them for different purposes.
+> log-stats
+  - Understanding how often or when a user has rebooted the phone.
 
 
 ## What do you get?
