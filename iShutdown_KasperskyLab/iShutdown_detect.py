@@ -17,16 +17,6 @@ def count_occurrences(content, target_phrase):
     return content.count(target_phrase)
 
 
-def update_result(text):
-    global result
-    result += text
-
-
-def print_colored(text, color, blink=False):
-    attrs = ['blink'] if blink else None
-    print(colored(text, color, attrs=attrs))
-
-
 def find_anomalies_before_sigterm(content, anomaly_phrase, threshold=3):
     sigterm_pattern = re.compile(r'SIGTERM: \[(\d+)\]')
     content_lines = content.splitlines()
@@ -80,14 +70,12 @@ def extract_target_file_contents(tar_file_path, target_file_name):
                     return target_file.read().decode('utf-8')
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("##############################################################################")
-        print("## Usage: python3 iShutdown_detect.py /path/to/your/sysdiagnose_file.tar.gz ##")
-        print("##############################################################################")
-        sys.exit(1)
-
-    tar_file_path = sys.argv[1]
+def detect_sys_diagnose(tar_file_path):
+    response_message = {}
+    response_message["green"] = []
+    response_message["red"] = []
+    response_message["yellow"] = []
+    response_message["black"] = []
     target_file_name = "shutdown.log"
 
     if os.path.isfile(tar_file_path):
@@ -96,21 +84,19 @@ if __name__ == "__main__":
         )
         if target_file_contents:
             occurrences = count_occurrences(target_file_contents, "SIGTERM")
-            print_colored(
-                f"+++ Detected {occurrences} reboot(s). Good practice to follow.", 'green'
-            )
+            response_message["green"].append(f"+++ Detected {occurrences} reboot(s). Good practice to follow.")
 
             # Find delay anomalies before SIGTERM reboot
             anomaly_phrase = "these clients are still here"
             anomalies_timestamps = find_anomalies_before_sigterm(target_file_contents, anomaly_phrase)
 
             if anomalies_timestamps:
-                print_colored(
-                    f"*** Detected {len(anomalies_timestamps)} reboot(s) with 3 or more delays before a reboot.", 'red')
-                for timestamp in anomalies_timestamps:
-                    print_colored(timestamp.strftime('%Y-%m-%d %H:%M:%S UTC'), 'yellow')
+                response_message["red"].append(
+                    f"*** Detected {len(anomalies_timestamps)} reboot(s) with 3 or more delays before a reboot.")
+                response_message["yellow"].append(
+                    timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') for timestamp in anomalies_timestamps)
             else:
-                print_colored("+++ No anomalies detected with the specified conditions.", 'green')
+                response_message["green"].append("+++ No anomalies detected with the specified conditions.")
 
             # Find entries in common malware path
             # List of paths to check
@@ -121,18 +107,17 @@ if __name__ == "__main__":
                 hit_count, decoded_dates, values, last_decoded_date = process_hits(target_file_contents, path)
 
                 if hit_count > 0:
-                    print_colored(
-                        f"*** Suspicious processes in '{path}' occurred {hit_count} time(s). Further investigation needed!",
-                        'red'
-                    )
-                    print_colored("*** The suspicious processes are:\n" + '\n'.join(values), 'red')
-                    print_colored("*** Detected during reboot(s) on:\n" + '\n'.join(decoded_dates), 'yellow')
+                    response_message['red'].append(
+                        f"*** Suspicious processes in '{path}' occurred {hit_count} time(s). Further investigation needed!")
+                    response_message['red'].append("*** The suspicious processes are:\n" + '\n'.join(values))
+                    response_message['yellow'].append("*** Detected during reboot(s) on:\n" + '\n'.join(decoded_dates))
                 elif last_decoded_date:
-                    print_colored(
-                        f"+++ No suspicious processes detected in '{path}'. Last reboot was on: {last_decoded_date}",
-                        'green')
+                    response_message['green'].append(
+                        f"+++ No suspicious processes detected in '{path}'. Last reboot was on: {last_decoded_date}")
 
+            return response_message
         else:
-            print(f"Target file '{target_file_name}' not found in the archive.")
+            response_message["black"].append(f"Target file '{target_file_name}' not found in the archive.")
+            return ""
     else:
-        print(f"File not found: {tar_file_path}")
+        return ""

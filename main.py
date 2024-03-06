@@ -1,16 +1,24 @@
-# This is a sample Python script.
+from fastapi import FastAPI, Query
+from starlette.middleware.cors import CORSMiddleware
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from routers.upload_file import upload_file_router
+from routers.get_log_extraction_parsing import parse_router
 
+# app
+app = FastAPI(
+    title='Network Inter Connected Device Detection',
+    version='1.0.0',
+    redoc_url='/api/v1/docs'
+)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# cors
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+app.include_router(upload_file_router)
+app.include_router(parse_router)

@@ -7,9 +7,10 @@ import os
 import csv
 import re
 from datetime import datetime
-import argparse
 import shutil
 import tempfile
+
+from utils import maintain_dir_for_each_upload
 
 
 def extract_log(tar_path, output_path):
@@ -88,50 +89,29 @@ def parse_log(log_path, output_path):
                 entries = []
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description=(
-            'A tool to extract and parse iOS shutdown logs from a .tar.gz archive. '
-            'Expected output is a csv file, summary file, and the log file.'
-        )
-    )
-    parser.add_argument(
-        '-e', '--extract',
-        help='Path to the .tar.gz archive for extracting shutdown.log file.',
-        required=True
-    )
-    parser.add_argument(
-        '-p', '--parse',
-        action='store_true',
-        help='Flag to indicate if the extracted log should be parsed.',
-        required=False
-    )
-    parser.add_argument(
-        '-o', '--output',
-        help='Path to save the output.',
-        default=".",
-        required=False
-    )
-
-    args = parser.parse_args()
+def parse_log_files(tar_path):
+    parse = True
+    # analysts and users want to share their log files and parse them for different purposes.
+    output_path = maintain_dir_for_each_upload(dir_name='storage/parse_shutdown')
 
     print("Starting extraction process...")
-    log_path = extract_log(args.extract, args.output)
+    log_path = extract_log(tar_path, output_path)
+    # log_path = extract_log(args.extract, args.output)
     print(f"File extracted to {log_path}.")
 
     _, log_sha1, _ = get_file_hashes(log_path)
-    renamed_path = os.path.join(args.output, f"{log_sha1}.log")
+    renamed_path = os.path.join(output_path, f"{log_sha1}.log")
     os.rename(log_path, renamed_path)
 
-    md5, sha1, sha256 = get_file_hashes(args.extract)
-    summary_path = os.path.join(args.output, 'extraction_summary.txt')
+    md5, sha1, sha256 = get_file_hashes(tar_path)
+    summary_path = os.path.join(output_path, 'extraction_summary.txt')
     with open(summary_path, 'w') as summary_file:
         summary_file.write(
             "Extraction Completion: "
             f"{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}\n\n"
         )
-        summary_file.write(f'Original Archive: {args.extract}\n')
-        summary_file.write(f'File Size: {os.path.getsize(args.extract)} bytes\n')
+        summary_file.write(f'Original Archive: {tar_path}\n')
+        summary_file.write(f'File Size: {os.path.getsize(tar_path)} bytes\n')
         summary_file.write(f'MD5: {md5}\n')
         summary_file.write(f'SHA1: {sha1}\n')
         summary_file.write(f'SHA256: {sha256}\n\n')
@@ -143,12 +123,7 @@ def main():
         summary_file.write(f'SHA1: {log_sha1}\n')
         summary_file.write(f'SHA256: {log_sha256}\n')
 
-    if args.parse:
+    if parse:
         print("Starting parsing process...")
-        parse_log(renamed_path, args.output)
+        parse_log(renamed_path, output_path)
         print("Parsing completed.")
-
-
-if __name__ == '__main__':
-    main()
-

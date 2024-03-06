@@ -1,4 +1,7 @@
 .idea
+.idea/workspace.xml
+/.idea
 __pycache__/
 /__pycache__/
 /__pycache__
+test.py
