@@ -5,6 +5,23 @@ import zipfile
 from pathlib import Path
 
 
+def get_log_file():
+    logfile_directory = "storage/parse_shutdown"
+
+    # Get a list of all files in the specified directory
+    files = os.listdir(logfile_directory)
+
+    # Filter the list to include only files with a .log extension
+    log_files = [file for file in files if file.endswith(".log")]
+
+    if len(log_files) == 1:
+        log_file = log_files[0]
+        log_file = f"{logfile_directory}/{log_file}"
+        return log_file
+    else:
+        return False
+
+
 def remove_content_in_directory(dist_path):
     # Clear the contents of the existing directory
     for file_name in os.listdir(dist_path):

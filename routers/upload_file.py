@@ -1,7 +1,5 @@
-import os
 import shutil
 
-import aiofiles
 from fastapi import UploadFile, File, APIRouter, BackgroundTasks
 from exceptions import file_extension_exception, file_not_uploaded_exception
 from iShutdown_KasperskyLab.iShutdown_detect import detect_sys_diagnose

@@ -11,9 +11,18 @@ macOS, iOS, iPadOS, tvOS, watchOS and visionOS.
 ## Prerequisites
 
 The scripts relies on the following Python dependencies respectively:
-- datetime, os, re, sys, tarfile, termcolor
-- argparse, csv, datetime, hashlib, os, re, shutil, tarfile
-- argparse, collections, datetime, re 
+- Server
+    >fastapi==0.110.0 
+  > 
+    >uvicorn==0.27.1
+  > 
+  >python-multipart==0.0.9
+- Sysdiagnose Detection
+    >datetime, os, re, sys, tarfile
+- Parse shutdown logs
+    >argparse, csv, datetime, hashlib, os, re, shutil, tarfile
+- Stats
+  >argparse, collections, datetime, re 
 
 
 ## Installation
