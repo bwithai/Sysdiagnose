@@ -14,7 +14,7 @@ extract_router = APIRouter(prefix="", tags=["Extract tar.gz files"])
 @extract_router.get("/extract-data/")
 async def extract_upload_file():
     tar_file_dir = os.path.join(os.getcwd(), "storage")
-    tar_file_path = get_target_file(tar_file_dir, ".tar.gz")
+    tar_file_path = get_target_file(tar_file_dir, "tar.gz")
     if not tar_file_path:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=".tar.gz file not found")
 

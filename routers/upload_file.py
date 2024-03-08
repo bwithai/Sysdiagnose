@@ -8,7 +8,7 @@ from utils import maintain_dir_for_each_upload
 upload_file_router = APIRouter(prefix="", tags=["Upload File to Parse"])
 
 # Define the allowed file extension
-ALLOWED_EXTENSIONS = {".tar.gz"}
+ALLOWED_EXTENSIONS = {"tar.gz"}
 
 
 def is_valid_file_extension(filename: str):

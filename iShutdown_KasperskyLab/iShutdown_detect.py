@@ -7,11 +7,6 @@ import re
 import tarfile
 from datetime import datetime
 
-# from termcolor import colored
-
-
-result = ""
-
 
 def count_occurrences(content, target_phrase):
     return content.count(target_phrase)
@@ -71,11 +66,7 @@ def extract_target_file_contents(tar_file_path, target_file_name):
 
 
 def detect_sys_diagnose(tar_file_path):
-    response_message = {}
-    response_message["green"] = []
-    response_message["red"] = []
-    response_message["yellow"] = []
-    response_message["black"] = []
+    response_messages = []
     target_file_name = "shutdown.log"
 
     if os.path.isfile(tar_file_path):
@@ -84,19 +75,19 @@ def detect_sys_diagnose(tar_file_path):
         )
         if target_file_contents:
             occurrences = count_occurrences(target_file_contents, "SIGTERM")
-            response_message["green"].append(f"Detected {occurrences} reboot(s). Good practice to follow.")
+            response_messages.append((f"Detected {occurrences} reboot(s). Good practice to follow.", "green"))
 
             # Find delay anomalies before SIGTERM reboot
             anomaly_phrase = "these clients are still here"
             anomalies_timestamps = find_anomalies_before_sigterm(target_file_contents, anomaly_phrase)
 
             if anomalies_timestamps:
-                response_message["red"].append(
-                    f"Detected {len(anomalies_timestamps)} reboot(s) with 3 or more delays before a reboot.")
-                response_message["yellow"].append(
-                    timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') for timestamp in anomalies_timestamps)
+                response_messages.append((
+                    f"Detected {len(anomalies_timestamps)} reboot(s) with 3 or more delays before a reboot.", "red"))
+                for timestamp in anomalies_timestamps:
+                    response_messages.append((timestamp.strftime('%Y-%m-%d %H:%M:%S UTC'), 'yellow'))
             else:
-                response_message["green"].append("No anomalies detected with the specified conditions.")
+                response_messages.append(("No anomalies detected with the specified conditions.", "green"))
 
             # Find entries in common malware path
             # List of paths to check
@@ -107,17 +98,20 @@ def detect_sys_diagnose(tar_file_path):
                 hit_count, decoded_dates, values, last_decoded_date = process_hits(target_file_contents, path)
 
                 if hit_count > 0:
-                    response_message['red'].append(
-                        f"Suspicious processes in '{path}' occurred {hit_count} time(s). Further investigation needed!")
-                    response_message['red'].append("The suspicious processes are:\n" + '\n'.join(values))
-                    response_message['yellow'].append("Detected during reboot(s) on:\n" + '\n'.join(decoded_dates))
+                    response_messages.append((
+                        f"Suspicious processes in '{path}' occurred {hit_count} time(s). Further investigation needed!",
+                        'red'))
+                    response_messages.append(("The suspicious processes are:\n" + '\n'.join(values), 'red'))
+                    response_messages.append(
+                        ("Detected during reboot(s) on:\n" + '\n'.join(decoded_dates), 'yellow'))
                 elif last_decoded_date:
-                    response_message['green'].append(
-                        f"No suspicious processes detected in '{path}'. Last reboot was on: {last_decoded_date}")
+                    response_messages.append((
+                        f"+++ No suspicious processes detected in '{path}'. Last reboot was on: {last_decoded_date}",
+                        'green'))
 
-            return response_message
+            return response_messages
         else:
-            response_message["black"].append(f"Target file '{target_file_name}' not found in the archive.")
+            print(f"Target file '{target_file_name}' not found in the archive.")
             return ""
     else:
         return ""
