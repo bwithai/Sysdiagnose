@@ -84,7 +84,7 @@ def detect_sys_diagnose(tar_file_path):
         )
         if target_file_contents:
             occurrences = count_occurrences(target_file_contents, "SIGTERM")
-            response_message["green"].append(f"+++ Detected {occurrences} reboot(s). Good practice to follow.")
+            response_message["green"].append(f"Detected {occurrences} reboot(s). Good practice to follow.")
 
             # Find delay anomalies before SIGTERM reboot
             anomaly_phrase = "these clients are still here"
@@ -92,11 +92,11 @@ def detect_sys_diagnose(tar_file_path):
 
             if anomalies_timestamps:
                 response_message["red"].append(
-                    f"*** Detected {len(anomalies_timestamps)} reboot(s) with 3 or more delays before a reboot.")
+                    f"Detected {len(anomalies_timestamps)} reboot(s) with 3 or more delays before a reboot.")
                 response_message["yellow"].append(
                     timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') for timestamp in anomalies_timestamps)
             else:
-                response_message["green"].append("+++ No anomalies detected with the specified conditions.")
+                response_message["green"].append("No anomalies detected with the specified conditions.")
 
             # Find entries in common malware path
             # List of paths to check
@@ -108,12 +108,12 @@ def detect_sys_diagnose(tar_file_path):
 
                 if hit_count > 0:
                     response_message['red'].append(
-                        f"*** Suspicious processes in '{path}' occurred {hit_count} time(s). Further investigation needed!")
-                    response_message['red'].append("*** The suspicious processes are:\n" + '\n'.join(values))
-                    response_message['yellow'].append("*** Detected during reboot(s) on:\n" + '\n'.join(decoded_dates))
+                        f"Suspicious processes in '{path}' occurred {hit_count} time(s). Further investigation needed!")
+                    response_message['red'].append("The suspicious processes are:\n" + '\n'.join(values))
+                    response_message['yellow'].append("Detected during reboot(s) on:\n" + '\n'.join(decoded_dates))
                 elif last_decoded_date:
                     response_message['green'].append(
-                        f"+++ No suspicious processes detected in '{path}'. Last reboot was on: {last_decoded_date}")
+                        f"No suspicious processes detected in '{path}'. Last reboot was on: {last_decoded_date}")
 
             return response_message
         else:

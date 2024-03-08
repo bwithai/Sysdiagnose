@@ -96,7 +96,6 @@ def parse_log_files(tar_path):
 
     print("Starting extraction process...")
     log_path = extract_log(tar_path, output_path)
-    # log_path = extract_log(args.extract, args.output)
     print(f"File extracted to {log_path}.")
 
     _, log_sha1, _ = get_file_hashes(log_path)
