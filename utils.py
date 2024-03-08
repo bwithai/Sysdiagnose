@@ -5,19 +5,17 @@ import zipfile
 from pathlib import Path
 
 
-def get_log_file():
-    logfile_directory = "storage/parse_shutdown"
-
+def get_target_file(dist_dir, extension):
     # Get a list of all files in the specified directory
-    files = os.listdir(logfile_directory)
+    files = os.listdir(dist_dir)
 
     # Filter the list to include only files with a .log extension
-    log_files = [file for file in files if file.endswith(".log")]
+    target_files = [file for file in files if file.endswith(extension)]
 
-    if len(log_files) == 1:
-        log_file = log_files[0]
-        log_file = f"{logfile_directory}/{log_file}"
-        return log_file
+    if len(target_files) == 1:
+        file_to_return = target_files[0]
+        file_to_return = f"{dist_dir}/{file_to_return}"
+        return file_to_return
     else:
         return False
 
@@ -43,6 +41,69 @@ def maintain_dir_for_each_upload(dir_name):
     else:
         remove_content_in_directory(dist_path)
     return dist_path
+
+
+def parse_shutdown():
+    log_lines, txt_lines, csv_lines = "", "", ""
+    parse_files = get_files()
+    for file in parse_files:
+        if file.endswith(".log"):
+            log_lines = get_file_data(file)
+        elif file.endswith('.txt'):
+            txt_lines = get_file_data(file)
+        elif file.endswith('.csv'):
+            csv_lines = get_file_data(file)
+
+    return log_lines, txt_lines, csv_lines
+
+
+def convert_csv_to_html():
+    log_file_path = "storage/parse_shutdown/parsed_shutdown.csv"  # Replace with the actual path to your log file
+
+    try:
+        csv_data = []
+        with open(log_file_path, 'r') as log_file:
+            count = 1
+            for line in log_file:
+                if line == "":
+                    continue
+                if count > 4:
+                    csv_data.append(line)
+                else:
+                    print(line.strip())
+                count += 1
+
+        # Convert csv_data to HTML table
+        html_table = "<table border='1'>\n"
+        for csv_line in csv_data:
+            html_table += "<tr>"
+            for cell in csv_line.strip().split(','):
+                html_table += f"<td>{cell}</td>"
+            html_table += "</tr>\n"
+        html_table += "</table>"
+
+        return html_table
+
+    except FileNotFoundError:
+        print(f"The file {log_file_path} was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def get_file_data(file_path):
+    lines = []
+    try:
+        with open(file_path, 'r') as log_file:
+            for line in log_file:
+                if line == "":
+                    continue
+                lines.append(line.strip())
+                # print(line.strip())
+        return lines
+    except FileNotFoundError:
+        print(f"The file {file_path} was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def get_files():

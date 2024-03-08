@@ -2,11 +2,10 @@ import shutil
 
 from fastapi import UploadFile, File, APIRouter, BackgroundTasks
 from exceptions import file_extension_exception, file_not_uploaded_exception
-from iShutdown_KasperskyLab.iShutdown_detect import detect_sys_diagnose
 from iShutdown_KasperskyLab.iShutdown_parse import parse_log_files
-from utils import remove_content_in_directory, maintain_dir_for_each_upload
+from utils import maintain_dir_for_each_upload
 
-upload_file_router = APIRouter(prefix="", tags=["Upload File to Detect & Parse"])
+upload_file_router = APIRouter(prefix="", tags=["Upload File to Parse"])
 
 # Define the allowed file extension
 ALLOWED_EXTENSIONS = {".tar.gz"}
@@ -43,10 +42,9 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
         shutil.move(new_file_src, store_new_file_at_dist)
 
         # call iShutdown_detect.py
-        response = detect_sys_diagnose(tar_file_path)
+        # response = detect_sys_diagnose(tar_file_path)
 
-        return {"message": "File Uploaded Successfully",
-                "detect_response": response}
+        return {"message": "File Uploaded Successfully"}
 
     except Exception as e:
         # Handle any exceptions that might occur during file processing

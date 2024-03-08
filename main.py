@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from routers.extract_sys_diagnose import extract_router
 from routers.get_stats import stats_router
 from routers.upload_file import upload_file_router
 from routers.get_log_extraction_parsing import parse_router
@@ -22,5 +23,6 @@ app.add_middleware(
 )
 
 app.include_router(upload_file_router)
-app.include_router(parse_router)
-app.include_router(stats_router)
+app.include_router(extract_router)
+# app.include_router(parse_router)
+# app.include_router(stats_router)
